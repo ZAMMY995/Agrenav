@@ -38,7 +38,7 @@
         </div>
         <div>
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Formato Español (1.000,50)
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> AGRENAV (SDB)
             </span>
         </div>
     </header>
@@ -129,7 +129,7 @@
 
     <script>
         // Inicializar Lucide Icons
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         // Configuración Worker PDF.js
         if (typeof pdfjsLib !== 'undefined') {
@@ -183,9 +183,7 @@
 
         function limpiarNombrePais(rawStr) {
             if (!rawStr) return "";
-            let s = String(rawStr).split('
-')[0].split('
-')[0];
+            let s = String(rawStr).replace(/\r/g, '').split('\n')[0];
             s = s.replace(/UU\.?EE\.?:?.*/gi, '');
             s = s.trim();
             return s;
@@ -202,7 +200,7 @@
             }
 
             statusMsg.innerHTML = `<span class="text-sky-400 font-medium flex items-center gap-2"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Procesando documentos...</span>`;
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
 
             let log = [];
 
@@ -306,7 +304,6 @@
             }
 
             if (!rows) {
-                // Fallback a primera hoja
                 rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
             }
 
@@ -331,7 +328,6 @@
                     if (cName) pTemp.push({ colIdx: c, nombre: cName });
                 }
 
-                // Ordenar países alfabéticamente
                 pTemp.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
                 matrizCaja.paises = pTemp.map(p => p.nombre);
                 matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
