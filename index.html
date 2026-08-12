@@ -16,7 +16,10 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .navy-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
+        .tab-btn { padding-bottom: 0.5rem; cursor: pointer; border-bottom: 2px solid transparent; }
         .tab-btn.active { border-bottom: 2px solid #38bdf8; color: #38bdf8; font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -32,554 +35,169 @@
                 <p class="text-xs text-slate-400">Armada de Chile · Estado Mayor General</p>
             </div>
         </div>
-        <div>
-            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Formato Español (1.000,50)
-            </span>
-        </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Panel Izquierdo: Carga de Archivos -->
         <section class="lg:col-span-4 space-y-6">
-            
             <div class="navy-card p-5">
                 <h2 class="text-base font-semibold text-slate-200 mb-4 flex items-center gap-2">
                     <i data-lucide="file-up" class="w-5 h-5 text-sky-400"></i> Carga de Archivos
                 </h2>
-                
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-300 mb-1">1. Cartola HSBC (PDF)</label>
                         <input type="file" id="pdfInput" accept=".pdf" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer border border-slate-700 rounded-lg bg-slate-900/50">
                     </div>
-
                     <div>
                         <label class="block text-xs font-medium text-slate-300 mb-1">2. Caja Trimestral (.xls / .xlsx)</label>
                         <input type="file" id="excelInput" accept=".xls,.xlsx" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 cursor-pointer border border-slate-700 rounded-lg bg-slate-900/50">
                     </div>
-
-                    <button id="btnProcesar" onclick="procesarArchivos()" class="w-full mt-2 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-md shadow-sky-900/20">
-                        <i data-lucide="cpu" class="w-4 h-4"></i> Procesar Documentos
-                    </button>
+                    <button onclick="procesarArchivos()" class="w-full mt-2 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg text-sm transition">Procesar Documentos</button>
                 </div>
             </div>
-
-            <!-- Panel Informativo -->
-            <div class="navy-card p-5 text-xs text-slate-400 space-y-2">
-                <h3 class="font-semibold text-slate-200 flex items-center gap-1.5 text-sm">
-                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Especificaciones
-                </h3>
-                <p>• <strong>Fechas:</strong> Ordenadas cronológicamente del 1° al último día del mes en formato <code class="text-sky-300">DD/MM/AA</code>.</p>
-                <p>• <strong>Montos:</strong> Separador de miles con punto y decimales con coma (ej. <code class="text-sky-300">3.700,00</code>).</p>
-                <p>• <strong>Caja Trimestral:</strong> Matriz por país ordenada alfabéticamente + Totales generales.</p>
-            </div>
-
         </section>
 
-        <!-- Panel Derecho: Tablas de Resultados -->
         <section class="lg:col-span-8 space-y-6">
-
             <div class="navy-card p-5 min-h-[550px] flex flex-col">
-                
-                <!-- Pestañas de Navegación -->
                 <div class="flex border-b border-slate-700 gap-4 text-xs font-medium mb-4 overflow-x-auto">
-                    <button onclick="switchTab('tabEgresos')" id="btnTabEgresos" class="tab-btn active pb-2 transition flex items-center gap-1.5 whitespace-nowrap">
-                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i> Egresos HSBC
-                    </button>
-                    <button onclick="switchTab('tabIngresos')" id="btnTabIngresos" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 whitespace-nowrap">
-                        <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i> Ingresos HSBC
-                    </button>
-                    <button onclick="switchTab('tabDesgloseCaja')" id="btnTabDesgloseCaja" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 whitespace-nowrap">
-                        <i data-lucide="grid" class="w-4 h-4 text-amber-400"></i> Matriz Caja Trimestral (Por País)
-                    </button>
-                    <button onclick="switchTab('tabTotalesGenerales')" id="btnTabTotalesGenerales" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 whitespace-nowrap">
-                        <i data-lucide="pie-chart" class="w-4 h-4 text-sky-400"></i> Totales Generales por Ítem
-                    </button>
+                    <button onclick="showTab('tabEgresos', this)" class="tab-btn active pb-2">Egresos HSBC</button>
+                    <button onclick="showTab('tabIngresos', this)" class="tab-btn pb-2">Ingresos HSBC</button>
+                    <button onclick="showTab('tabDesgloseCaja', this)" class="tab-btn pb-2">Matriz Caja</button>
+                    <button onclick="showTab('tabTotalesGenerales', this)" class="tab-btn pb-2">Totales por Ítem</button>
                 </div>
 
-                <!-- Barra de Estado y Botones -->
-                <div class="flex justify-between items-center mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
-                    <div id="statusMsg" class="text-xs text-slate-400 flex items-center gap-2">
-                        <i data-lucide="info" class="w-4 h-4 text-sky-400"></i> Suba los archivos y presione "Procesar Documentos".
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="copiarTablaActual()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs rounded font-medium flex items-center gap-1.5 transition">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Tabla para Excel
-                        </button>
-                        <button onclick="exportarExcel()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs rounded font-medium flex items-center gap-1.5 transition">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar XLSX
-                        </button>
-                    </div>
+                <div class="flex justify-end gap-2 mb-4">
+                    <button onclick="copiarTablaActual()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs rounded font-medium transition">Copiar para Excel</button>
                 </div>
 
-                <!-- Tablas de Datos -->
                 <div class="flex-1 overflow-x-auto">
-                    
-                    <!-- TAB EGRESOS -->
-                    <div id="tabEgresos" class="tab-content">
-                        <table id="tableEgresos" class="w-full text-left text-xs text-slate-300">
-                            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
-                                <tr>
-                                    <th class="p-2.5">N° Corr</th>
-                                    <th class="p-2.5">Fecha (DD/MM/AA)</th>
-                                    <th class="p-2.5">N° Comprobante</th>
-                                    <th class="p-2.5">Detalle</th>
-                                    <th class="p-2.5 text-right">Monto USD</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800/60">
-                                <tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- TAB INGRESOS -->
-                    <div id="tabIngresos" class="tab-content hidden">
-                        <table id="tableIngresos" class="w-full text-left text-xs text-slate-300">
-                            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
-                                <tr>
-                                    <th class="p-2.5">N° Corr</th>
-                                    <th class="p-2.5">Fecha (DD/MM/AA)</th>
-                                    <th class="p-2.5">N° Comprobante</th>
-                                    <th class="p-2.5">Detalle</th>
-                                    <th class="p-2.5 text-right">Monto USD</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-800/60">
-                                <tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- TAB DESGLOSE CAJA POR PAÍS -->
-                    <div id="tabDesgloseCaja" class="tab-content hidden">
-                        <table id="tableDesgloseCaja" class="w-full text-left text-xs text-slate-300 whitespace-nowrap">
-                            <thead id="headCajaMatriz" class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
-                                <tr><th class="p-2.5">ITEM</th><th class="p-2.5">DETALLES</th></tr>
-                            </thead>
-                            <tbody id="bodyCajaMatriz" class="divide-y divide-slate-800/60">
-                                <tr><td colspan="2" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel (.xls/.xlsx) para generar la matriz.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- TAB TOTALES GENERALES -->
-                    <div id="tabTotalesGenerales" class="tab-content hidden">
-                        <table id="tableTotalesGenerales" class="w-full text-left text-xs text-slate-300">
-                            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
-                                <tr>
-                                    <th class="p-2.5">CÓDIGO ÍTEM</th>
-                                    <th class="p-2.5">DETALLE DEL ÍTEM</th>
-                                    <th class="p-2.5 text-right">TOTAL GENERAL (USD)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bodyTotalesGenerales" class="divide-y divide-slate-800/60">
-                                <tr><td colspan="3" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel para consolidar los totales generales.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
+                    <div id="tabEgresos" class="tab-content active"><table id="tableEgresos" class="w-full text-left text-xs text-slate-300"><thead><tr class="bg-slate-900/80"><th class="p-2.5">Corr.</th><th class="p-2.5">Fecha</th><th class="p-2.5">Comprobante</th><th class="p-2.5">Detalle</th><th class="p-2.5 text-right">Monto USD</th></tr></thead><tbody class="divide-y divide-slate-800"></tbody></table></div>
+                    <div id="tabIngresos" class="tab-content"><table id="tableIngresos" class="w-full text-left text-xs text-slate-300"><thead><tr class="bg-slate-900/80"><th class="p-2.5">Corr.</th><th class="p-2.5">Fecha</th><th class="p-2.5">Comprobante</th><th class="p-2.5">Detalle</th><th class="p-2.5 text-right">Monto USD</th></tr></thead><tbody class="divide-y divide-slate-800"></tbody></table></div>
+                    <div id="tabDesgloseCaja" class="tab-content"><table id="tableDesgloseCaja" class="w-full text-left text-xs text-slate-300"><thead id="headCajaMatriz" class="bg-slate-900/80"></thead><tbody id="bodyCajaMatriz" class="divide-y divide-slate-800"></tbody></table></div>
+                    <div id="tabTotalesGenerales" class="tab-content"><table id="tableTotalesGenerales" class="w-full text-left text-xs text-slate-300"><thead><tr class="bg-slate-900/80"><th class="p-2.5">Ítem</th><th class="p-2.5">Detalle</th><th class="p-2.5 text-right">Total</th></tr></thead><tbody id="bodyTotalesGenerales" class="divide-y divide-slate-800"></tbody></table></div>
                 </div>
-
             </div>
-
         </section>
-
     </main>
 
-    <!-- JAVASCRIPT: ORDEN CRONOLÓGICO, COMAS DECIMALES Y MATRIZ POR PAÍS -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
         let datosHsbc = { egresos: [], ingresos: [] };
         let matrizCaja = { paises: [], items: [], data: {}, totalesPais: {}, totalGeneral: 0 };
-        let activeTab = 'tabEgresos';
+        let activeTabId = 'tabEgresos';
 
-        lucide.createIcons();
-
-        const mesesMap = {
-            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
-            'Ene': 1, 'Abr': 4, 'Ago': 8, 'Dic': 12
-        };
-
-        function parsearFechaHsbc(fechaRaw) {
-            let partes = fechaRaw.trim().split(/\s+/);
-            if (partes.length === 3) {
-                let dia = parseInt(partes[0], 10);
-                let mes = mesesMap[partes[1]] || 1;
-                let anio = parseInt(partes[2], 10);
-                return new Date(anio, mes - 1, dia);
-            }
-            return new Date(0);
-        }
-
-        function formatearFechaDDMMAA(d) {
-            let dia = String(d.getDate()).padStart(2, '0');
-            let mes = String(d.getMonth() + 1).padStart(2, '0');
-            let anio = String(d.getFullYear()).slice(-2);
-            return `${dia}/${mes}/${anio}`;
-        }
-
-        // Formato con punto de miles y coma decimal (ej. 3.700,00)
-        function formatearMonedaEspanol(val) {
-            if (val === 0) return '0,00';
-            if (isNaN(val) || val === null) return '-';
-            
-            let partes = val.toFixed(2).split('.');
-            let entero = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            let decimal = partes[1];
-            return `${entero},${decimal}`;
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        function showTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.remove('hidden');
-            activeTab = tabId;
-
-            if(tabId === 'tabEgresos') document.getElementById('btnTabEgresos').classList.add('active');
-            if(tabId === 'tabIngresos') document.getElementById('btnTabIngresos').classList.add('active');
-            if(tabId === 'tabDesgloseCaja') document.getElementById('btnTabDesgloseCaja').classList.add('active');
-            if(tabId === 'tabTotalesGenerales') document.getElementById('btnTabTotalesGenerales').classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            activeTabId = tabId;
         }
 
         async function procesarArchivos() {
             const pdfFile = document.getElementById('pdfInput').files[0];
             const excelFile = document.getElementById('excelInput').files[0];
-            const statusMsg = document.getElementById('statusMsg');
-
-            if (!pdfFile && !excelFile) {
-                alert('Por favor seleccione al menos un archivo (Cartola PDF o Caja Excel).');
-                return;
-            }
-
-            statusMsg.innerHTML = `<span class="text-sky-400 animate-pulse">Procesando archivos...</span>`;
-
-            try {
-                if (pdfFile) {
-                    const arrayBuffer = await pdfFile.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    let textLines = [];
-
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const tokenProps = await page.getTextContent();
-                        
-                        let linesMap = {};
-                        tokenProps.items.forEach(item => {
-                            let y = Math.round(item.transform[5]);
-                            if (!linesMap[y]) linesMap[y] = [];
-                            linesMap[y].push(item.str);
-                        });
-
-                        let sortedY = Object.keys(linesMap).sort((a, b) => b - a);
-                        sortedY.forEach(y => {
-                            let lineStr = linesMap[y].join(" ").trim();
-                            if (lineStr) textLines.push(lineStr);
-                        });
-                    }
-                    extraerTransaccionesHSBC(textLines);
-                }
-
-                if (excelFile) {
-                    await procesarExcelCajaMatriz(excelFile);
-                }
-
-                renderizarTablas();
-
-                let msj = `✓ Procesado: ${datosHsbc.ingresos.length} Ingresos, ${datosHsbc.egresos.length} Egresos`;
-                if (matrizCaja.paises.length > 0) msj += ` y Caja Trimestral (${matrizCaja.paises.length} Países).`;
-                statusMsg.innerHTML = `<span class="text-emerald-400 font-medium">${msj}</span>`;
-
-            } catch (error) {
-                console.error("Error al procesar:", error);
-                statusMsg.innerHTML = `<span class="text-rose-400">Error al procesar los archivos. Verifique el formato.</span>`;
-            }
+            if (pdfFile) await leerPDF(pdfFile);
+            if (excelFile) await leerExcel(excelFile);
+            renderizarTodo();
         }
 
-        function extraerTransaccionesHSBC(lines) {
-            datosHsbc.egresos = [];
-            datosHsbc.ingresos = [];
+        async function leerPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let textLines = [];
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                let linesMap = {};
+                content.items.forEach(it => {
+                    let y = Math.round(it.transform[5]);
+                    if (!linesMap[y]) linesMap[y] = [];
+                    linesMap[y].push(it.str);
+                });
+                Object.keys(linesMap).sort((a,b) => b-a).forEach(y => textLines.push(linesMap[y].join(" ").trim()));
+            }
+            extraerHsbc(textLines);
+        }
 
+        function extraerHsbc(lines) {
+            datosHsbc = { egresos: [], ingresos: [] };
             lines.forEach(line => {
                 let match = line.match(/^(\d{8,10})\s+(\d{2}\s+[A-Za-z]{3}\s+\d{4})\s+(.+)$/);
                 if (match) {
-                    let ref = match[1];
-                    let fechaOriginal = match[2];
-                    let fechaObj = parsearFechaHsbc(fechaOriginal);
-                    let fechaFormateada = formatearFechaDDMMAA(fechaObj);
-                    let resto = match[3];
-
+                    let [_, ref, fechaRaw, resto] = match;
                     let montoMatch = resto.match(/(-?[\d,]+\.\d{2})\s*$/);
                     if (montoMatch) {
-                        let montoStr = montoMatch[1];
-                        let detalleRaw = resto.substring(0, resto.lastIndexOf(montoStr)).trim();
-                        let detalleLimpio = detalleRaw.replace(/[\d,]+\.\d{2}$/, '').trim();
-
-                        if (montoStr.includes('-')) {
-                            let monto = Math.abs(parseFloat(montoStr.replace('-', '').replace(/,/g, '')));
-                            datosHsbc.egresos.push({ ref, fechaObj, fecha: fechaFormateada, detalle: detalleLimpio, monto });
-                        } else {
-                            let monto = parseFloat(montoStr.replace(/,/g, ''));
-                            datosHsbc.ingresos.push({ ref, fechaObj, fecha: fechaFormateada, detalle: detalleLimpio, monto });
-                        }
+                        let monto = parseFloat(montoMatch[1].replace('-', '').replace(',', ''));
+                        let fechaObj = parsearFecha(fechaRaw);
+                        let record = { ref, fecha: formatearFecha(fechaObj), fechaObj, detalle: resto.replace(montoMatch[1], '').trim(), monto };
+                        if (montoMatch[1].includes('-')) datosHsbc.egresos.push(record);
+                        else datosHsbc.ingresos.push(record);
                     }
                 }
             });
-
-            // Ordenar de forma ascendente por fecha (1° al último día del mes)
-            datosHsbc.egresos.sort((a, b) => a.fechaObj - b.fechaObj);
-            datosHsbc.ingresos.sort((a, b) => a.fechaObj - b.fechaObj);
+            datosHsbc.egresos.sort((a,b) => a.fechaObj - b.fechaObj);
+            datosHsbc.ingresos.sort((a,b) => a.fechaObj - b.fechaObj);
         }
 
-        async function procesarExcelCajaMatriz(file) {
+        function parsearFecha(raw) {
+            let p = raw.split(/\s+/);
+            const m = {'Jan':0,'Feb':1,'Mar':2,'Apr':3,'May':4,'Jun':5,'Jul':6,'Aug':7,'Sep':8,'Oct':9,'Nov':10,'Dec':11};
+            return new Date(parseInt(p[2]), m[p[1]]||0, parseInt(p[0]));
+        }
+
+        function formatearFecha(d) { return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(-2)}`; }
+        function fmt(v) { return v.toFixed(2).replace('.', ','); }
+
+        async function leerExcel(file) {
             matrizCaja = { paises: [], items: [], data: {}, totalesPais: {}, totalGeneral: 0 };
             const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data, { type: 'array' });
-            
-            // Preferir 'Hoja3' si existe (es la matriz vertical oficial), si no la primera hoja
-            let sheetName = workbook.SheetNames.includes('Hoja3') ? 'Hoja3' : workbook.SheetNames[0];
-            let sheet = workbook.Sheets[sheetName];
-            let rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-            if (sheetName === 'Hoja3') {
-                // Parsear Hoja3 directa
-                let headerRow = rows[1] || [];
-                let paisesTemp = [];
-                let colToPais = {};
-
-                for (let c = 2; c < headerRow.length; c++) {
-                    let cellVal = String(headerRow[c] || '').trim();
-                    if (!cellVal || cellVal.startsWith('TOTALES')) continue;
-                    let nombrePais = cellVal.split('\n')[0].split('
-')[0].trim();
-                    paisesTemp.push({ colIdx: c, nombre: nombrePais });
-                }
-
-                // Ordenar países alfabéticamente
-                paisesTemp.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
-                matrizCaja.paises = paisesTemp.map(p => p.nombre);
-
-                // Inicializar acumuladores
-                matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
-
-                for (let r = 2; r < rows.length; r++) {
-                    let row = rows[r];
-                    if (!row || !row[0]) continue;
-                    let code = String(row[0]).trim();
-                    let name = String(row[1] || '').trim();
-
-                    if (code === 'NaN' || name === 'TOTALES') continue;
-
-                    let itemObj = { code, name, totalItem: 0 };
-                    matrizCaja.data[code] = {};
-
-                    paisesTemp.forEach(p => {
-                        let val = parseFloat(row[p.colIdx]);
-                        val = isNaN(val) ? 0 : val;
-                        matrizCaja.data[code][p.nombre] = val;
-                        matrizCaja.totalesPais[p.nombre] += val;
-                        itemObj.totalItem += val;
-                    });
-
-                    matrizCaja.items.push(itemObj);
-                    matrizCaja.totalGeneral += itemObj.totalItem;
-                }
-            } else {
-                // Parsear Hoja1 transpuesta
-                let itemCodes = rows[1] || [];
-                let itemNames = rows[2] || [];
-                let paisesSet = new Set();
-                let rawRecords = [];
-
-                for (let r = 3; r < rows.length; r++) {
-                    let row = rows[r];
-                    if (!row || !row[0]) continue;
-                    let agregad = String(row[0]).trim();
-                    if (agregad.startsWith('- TOTALES') || agregad.startsWith('RESUMEN')) break;
-                    if (agregad.startsWith('UU.EE.')) continue;
-
-                    paisesSet.add(agregad);
-
-                    for (let c = 1; c < row.length; c++) {
-                        let val = parseFloat(row[c]);
-                        if (!isNaN(val) && val > 0) {
-                            rawRecords.push({ agregad, code: itemCodes[c], name: itemNames[c], val });
-                        }
-                    }
-                }
-
-                matrizCaja.paises = Array.from(paisesSet).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-                matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
-
-                // Recopilar ítems únicos
-                let itemsMap = {};
-                for (let c = 1; c < itemCodes.length; c++) {
-                    let code = itemCodes[c];
-                    let name = itemNames[c];
-                    if (code && !itemsMap[code]) {
-                        itemsMap[code] = { code, name, totalItem: 0 };
-                        matrizCaja.data[code] = {};
-                        matrizCaja.paises.forEach(p => matrizCaja.data[code][p] = 0);
-                    }
-                }
-
-                rawRecords.forEach(rec => {
-                    if (matrizCaja.data[rec.code]) {
-                        matrizCaja.data[rec.code][rec.agregad] = rec.val;
-                        matrizCaja.totalesPais[rec.agregad] += rec.val;
-                        itemsMap[rec.code].totalItem += rec.val;
-                        matrizCaja.totalGeneral += rec.val;
-                    }
+            const wb = XLSX.read(data, { type: 'array' });
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+            let h1 = rows[1] || [], h2 = rows[2] || [];
+            let pTemp = [];
+            for(let c=2; c<h1.length; c++) if(h1[c] && !String(h1[c]).includes('TOTALES')) pTemp.push({c, n: String(h1[c]).split('\n')[0].split('
+')[0].trim()});
+            pTemp.sort((a,b) => a.n.localeCompare(b.n));
+            matrizCaja.paises = pTemp.map(p => p.n);
+            matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
+            for(let r=3; r<rows.length; r++) {
+                if(!rows[r][0] || String(rows[r][1]) == 'TOTALES') continue;
+                let code = String(rows[r][0]), name = String(rows[r][1]);
+                let item = {code, name, total: 0};
+                matrizCaja.data[code] = {};
+                pTemp.forEach(p => {
+                    let v = parseFloat(rows[r][p.c]) || 0;
+                    matrizCaja.data[code][p.n] = v;
+                    matrizCaja.totalesPais[p.n] += v;
+                    item.total += v;
                 });
-
-                matrizCaja.items = Object.values(itemsMap);
+                matrizCaja.items.push(item);
+                matrizCaja.totalGeneral += item.total;
             }
         }
 
-        function renderizarTablas() {
-            // TAB 1: EGRESOS
-            const tbodyEgr = document.querySelector('#tableEgresos tbody');
-            tbodyEgr.innerHTML = '';
-            let corrEgr = 1;
-
-            datosHsbc.egresos.forEach(item => {
-                tbodyEgr.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="p-2.5 font-mono text-slate-400">${corrEgr++}</td>
-                        <td class="p-2.5 font-mono">${item.fecha}</td>
-                        <td class="p-2.5 font-mono text-sky-400">${item.ref}</td>
-                        <td class="p-2.5">${item.detalle}</td>
-                        <td class="p-2.5 text-right font-medium text-rose-400">${formatearMonedaEspanol(item.monto)}</td>
-                    </tr>`;
+        function renderizarTodo() {
+            ['egresos','ingresos'].forEach(type => {
+                const b = document.querySelector(`#table${type.charAt(0).toUpperCase()+type.slice(1)} tbody`);
+                b.innerHTML = '';
+                datosHsbc[type].forEach((it, i) => b.innerHTML += `<tr><td class="p-2">${i+1}</td><td class="p-2">${it.fecha}</td><td class="p-2 font-mono text-sky-400">${it.ref}</td><td class="p-2">${it.detalle}</td><td class="p-2 text-right">${fmt(it.monto)}</td></tr>`);
             });
-
-            if (datosHsbc.egresos.length === 0) {
-                tbodyEgr.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>`;
-            }
-
-            // TAB 2: INGRESOS
-            const tbodyIng = document.querySelector('#tableIngresos tbody');
-            tbodyIng.innerHTML = '';
-            let corrIng = 1;
-
-            datosHsbc.ingresos.forEach(item => {
-                tbodyIng.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="p-2.5 font-mono text-slate-400">${corrIng++}</td>
-                        <td class="p-2.5 font-mono">${item.fecha}</td>
-                        <td class="p-2.5 font-mono text-sky-400">${item.ref}</td>
-                        <td class="p-2.5">${item.detalle}</td>
-                        <td class="p-2.5 text-right font-medium text-emerald-400">${formatearMonedaEspanol(item.monto)}</td>
-                    </tr>`;
-            });
-
-            if (datosHsbc.ingresos.length === 0) {
-                tbodyIng.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>`;
-            }
-
-            // TAB 3: MATRIZ CAJA
-            const headCaja = document.getElementById('headCajaMatriz');
-            const bodyCaja = document.getElementById('bodyCajaMatriz');
-
-            if (matrizCaja.paises.length > 0) {
-                let headHTML = `<tr><th class="p-2.5">ITEM</th><th class="p-2.5">DETALLES</th>`;
-                matrizCaja.paises.forEach(p => {
-                    headHTML += `<th class="p-2.5 text-right text-sky-300">${p}</th>`;
-                });
-                headHTML += `<th class="p-2.5 text-right text-emerald-400 font-bold">TOTAL ÍTEM</th></tr>`;
-                headCaja.innerHTML = headHTML;
-
-                let bodyHTML = '';
-                matrizCaja.items.forEach(it => {
-                    bodyHTML += `<tr class="hover:bg-slate-800/40">
-                        <td class="p-2.5 font-mono text-sky-400">${it.code}</td>
-                        <td class="p-2.5">${it.name}</td>`;
-                    matrizCaja.paises.forEach(p => {
-                        let val = matrizCaja.data[it.code] ? matrizCaja.data[it.code][p] : 0;
-                        bodyHTML += `<td class="p-2.5 text-right font-mono">${val > 0 ? formatearMonedaEspanol(val) : '-'}</td>`;
-                    });
-                    bodyHTML += `<td class="p-2.5 text-right font-mono font-semibold text-emerald-400">${formatearMonedaEspanol(it.totalItem)}</td></tr>`;
-                });
-
-                // Fila de Totales por País
-                bodyHTML += `<tr class="bg-slate-900 font-bold border-t-2 border-slate-700">
-                    <td colspan="2" class="p-2.5 text-slate-200">TOTALES</td>`;
-                matrizCaja.paises.forEach(p => {
-                    bodyHTML += `<td class="p-2.5 text-right font-mono text-emerald-400">${formatearMonedaEspanol(matrizCaja.totalesPais[p])}</td>`;
-                });
-                bodyHTML += `<td class="p-2.5 text-right font-mono text-emerald-300 text-sm">${formatearMonedaEspanol(matrizCaja.totalGeneral)}</td></tr>`;
-
-                bodyCaja.innerHTML = bodyHTML;
-            } else {
-                bodyCaja.innerHTML = `<tr><td colspan="2" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel (.xls/.xlsx) para generar la matriz.</td></tr>`;
-            }
-
-            // TAB 4: TOTALES GENERALES
-            const bodyTotales = document.getElementById('bodyTotalesGenerales');
-            if (matrizCaja.items.length > 0) {
-                let totalesHTML = '';
-                matrizCaja.items.forEach(it => {
-                    totalesHTML += `<tr class="hover:bg-slate-800/40">
-                        <td class="p-2.5 font-mono text-sky-400">${it.code}</td>
-                        <td class="p-2.5">${it.name}</td>
-                        <td class="p-2.5 text-right font-mono font-semibold text-emerald-400">${formatearMonedaEspanol(it.totalItem)}</td>
-                    </tr>`;
-                });
-                totalesHTML += `<tr class="bg-slate-900 font-bold border-t-2 border-slate-700 text-sm">
-                    <td colspan="2" class="p-2.5 text-slate-200">TOTAL GENERAL CAJA TRIMESTRAL</td>
-                    <td class="p-2.5 text-right font-mono text-emerald-300">${formatearMonedaEspanol(matrizCaja.totalGeneral)}</td>
-                </tr>`;
-                bodyTotales.innerHTML = totalesHTML;
-            } else {
-                bodyTotales.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel para consolidar los totales generales.</td></tr>`;
-            }
+            const h = document.getElementById('headCajaMatriz');
+            const b = document.getElementById('bodyCajaMatriz');
+            h.innerHTML = `<tr><th>ITEM</th><th>DETALLE</th>${matrizCaja.paises.map(p=>`<th class="text-right">${p}</th>`).join('')}<th>TOTAL</th></tr>`;
+            b.innerHTML = matrizCaja.items.map(it => `<tr><td>${it.code}</td><td>${it.name}</td>${matrizCaja.paises.map(p=>`<td class="text-right">${fmt(matrizCaja.data[it.code][p])}</td>`).join('')}<td class="text-right font-bold">${fmt(it.total)}</td></tr>`).join('');
+            document.getElementById('bodyTotalesGenerales').innerHTML = matrizCaja.items.map(it => `<tr><td>${it.code}</td><td>${it.name}</td><td class="text-right">${fmt(it.total)}</td></tr>`).join('');
         }
 
         function copiarTablaActual() {
-            let tableId = 'tableEgresos';
-            if (activeTab === 'tabIngresos') tableId = 'tableIngresos';
-            if (activeTab === 'tabDesgloseCaja') tableId = 'tableDesgloseCaja';
-            if (activeTab === 'tabTotalesGenerales') tableId = 'tableTotalesGenerales';
-
-            let table = document.getElementById(tableId);
-
-            if (!table || table.rows.length <= 1) {
-                alert('No hay datos procesados para copiar.');
-                return;
-            }
-
+            let el = document.getElementById(activeTabId === 'tabEgresos' ? 'tableEgresos' : activeTabId === 'tabIngresos' ? 'tableIngresos' : activeTabId === 'tabDesgloseCaja' ? 'tableDesgloseCaja' : 'tableTotalesGenerales');
             let range = document.createRange();
-            range.selectNode(table);
-            window.getSelection().removeAllRanges();
+            range.selectNode(el);
             window.getSelection().addRange(range);
-
-            try {
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges();
-                alert('¡Tabla copiada exitosamente! Ve a Excel y presiona Ctrl + V.');
-            } catch (err) {
-                alert('No se pudo copiar automáticamente. Seleccione la tabla manualmente.');
-            }
-        }
-
-        function exportarExcel() {
-            let wb = XLSX.utils.book_new();
-            let tableEgr = document.getElementById('tableEgresos');
-            let tableIng = document.getElementById('tableIngresos');
-            let tableCaja = document.getElementById('tableDesgloseCaja');
-            let tableTotales = document.getElementById('tableTotalesGenerales');
-
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableEgr), "Egresos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableIng), "Ingresos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableCaja), "Matriz Caja");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableTotales), "Totales por Ítem");
-
-            XLSX.writeFile(wb, "Rendicion_Completa_AANN.xlsx");
+            document.execCommand('copy');
+            alert('Copiado al portapapeles');
         }
     </script>
 </body>
