@@ -16,7 +16,8 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .navy-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
-        .tab-btn { padding: 0.5rem 0.75rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-btn { padding: 0.5rem 0.75rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; color: #94a3b8; }
+        .tab-btn:hover { color: #e2e8f0; }
         .tab-btn.active { border-bottom: 2px solid #38bdf8; color: #38bdf8; font-weight: 600; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -180,6 +181,16 @@
             return `${entero},${partes[1]}`;
         }
 
+        function limpiarNombrePais(rawStr) {
+            if (!rawStr) return "";
+            let s = String(rawStr).split('
+')[0].split('
+')[0];
+            s = s.replace(/UU\.?EE\.?:?.*/gi, '');
+            s = s.trim();
+            return s;
+        }
+
         async function procesarArchivos() {
             const pdfFile = document.getElementById('pdfInput').files[0];
             const excelFile = document.getElementById('excelInput').files[0];
@@ -279,40 +290,67 @@
             const data = await file.arrayBuffer();
             const wb = XLSX.read(data, { type: 'array' });
             
-            // Buscar hoja adecuada (Hoja3 o Hoja1)
-            let sheetName = wb.SheetNames.includes('Hoja3') ? 'Hoja3' : wb.SheetNames[0];
-            let sheet = wb.Sheets[sheetName];
-            let rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            // Recorrer todas las hojas buscando la que contenga la tabla con 'ITEM' y 'DETALLE'
+            let rows = null;
+            for (let sName of wb.SheetNames) {
+                let sheet = wb.Sheets[sName];
+                let sheetRows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                for (let r = 0; r < Math.min(15, sheetRows.length); r++) {
+                    let rStr = (sheetRows[r] || []).map(x => String(x)).join(' ').toUpperCase();
+                    if (rStr.includes('ITEM') && (rStr.includes('DETALLE') || rStr.includes('DETALLES'))) {
+                        rows = sheetRows;
+                        break;
+                    }
+                }
+                if (rows) break;
+            }
 
-            if (sheetName === 'Hoja3' || (rows[1] && String(rows[1][0]).includes('ITEM'))) {
-                // Estructura Matriz Vertical (Hoja3)
-                let headerRow = rows[1] || [];
+            if (!rows) {
+                // Fallback a primera hoja
+                rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+            }
+
+            // Encontrar fila de encabezado
+            let headerRIdx = -1;
+            for (let r = 0; r < Math.min(15, rows.length); r++) {
+                let rStr = (rows[r] || []).map(x => String(x)).join(' ').toUpperCase();
+                if (rStr.includes('ITEM') && (rStr.includes('DETALLE') || rStr.includes('DETALLES'))) {
+                    headerRIdx = r;
+                    break;
+                }
+            }
+
+            if (headerRIdx !== -1) {
+                let headerRow = rows[headerRIdx] || [];
                 let pTemp = [];
 
                 for (let c = 2; c < headerRow.length; c++) {
                     let cellVal = String(headerRow[c] || '').trim();
-                    if (!cellVal || cellVal.startsWith('TOTALES')) continue;
-                    let nombrePais = cellVal.split('\n')[0].split('\n')[0].trim();
-                    pTemp.push({ colIdx: c, nombre: nombrePais });
+                    if (!cellVal || cellVal.toUpperCase().includes('TOTAL')) continue;
+                    let cName = limpiarNombrePais(cellVal);
+                    if (cName) pTemp.push({ colIdx: c, nombre: cName });
                 }
 
+                // Ordenar países alfabéticamente
                 pTemp.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
                 matrizCaja.paises = pTemp.map(p => p.nombre);
                 matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
 
-                for (let r = 2; r < rows.length; r++) {
+                for (let r = headerRIdx + 1; r < rows.length; r++) {
                     let row = rows[r];
-                    if (!row || !row[0]) continue;
-                    let code = String(row[0]).trim();
+                    if (!row) continue;
+                    let code = String(row[0] || '').trim();
                     let name = String(row[1] || '').trim();
 
-                    if (code === 'NaN' || name === 'TOTALES' || code === 'ITEM') continue;
+                    if (code.toUpperCase() === 'TOTALES' || name.toUpperCase() === 'TOTALES') break;
+                    if (!code || code === 'undefined' || code === 'null') continue;
 
                     let itemObj = { code, name, total: 0 };
                     matrizCaja.data[code] = {};
 
                     pTemp.forEach(p => {
-                        let val = parseFloat(row[p.colIdx]);
+                        let rawVal = row[p.colIdx];
+                        let val = parseFloat(rawVal);
                         val = isNaN(val) ? 0 : val;
                         matrizCaja.data[code][p.nombre] = val;
                         matrizCaja.totalesPais[p.nombre] += val;
@@ -322,54 +360,6 @@
                     matrizCaja.items.push(itemObj);
                     matrizCaja.totalGeneral += itemObj.total;
                 }
-            } else {
-                // Estructura Hoja1
-                let itemCodes = rows[1] || [];
-                let itemNames = rows[2] || [];
-                let paisesSet = new Set();
-                let rawRecords = [];
-
-                for (let r = 3; r < rows.length; r++) {
-                    let row = rows[r];
-                    if (!row || !row[0]) continue;
-                    let agregad = String(row[0]).trim();
-                    if (agregad.startsWith('- TOTALES') || agregad.startsWith('RESUMEN')) break;
-                    if (agregad.startsWith('UU.EE.')) continue;
-
-                    paisesSet.add(agregad);
-
-                    for (let c = 1; c < row.length; c++) {
-                        let val = parseFloat(row[c]);
-                        if (!isNaN(val) && val > 0) {
-                            rawRecords.push({ agregad, code: String(itemCodes[c]).trim(), name: String(itemNames[c]).trim(), val });
-                        }
-                    }
-                }
-
-                matrizCaja.paises = Array.from(paisesSet).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-                matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
-
-                let itemsMap = {};
-                for (let c = 1; c < itemCodes.length; c++) {
-                    let code = String(itemCodes[c] || '').trim();
-                    let name = String(itemNames[c] || '').trim();
-                    if (code && !itemsMap[code]) {
-                        itemsMap[code] = { code, name, total: 0 };
-                        matrizCaja.data[code] = {};
-                        matrizCaja.paises.forEach(p => matrizCaja.data[code][p] = 0);
-                    }
-                }
-
-                rawRecords.forEach(rec => {
-                    if (matrizCaja.data[rec.code]) {
-                        matrizCaja.data[rec.code][rec.agregad] = rec.val;
-                        matrizCaja.totalesPais[rec.agregad] += rec.val;
-                        itemsMap[rec.code].total += rec.val;
-                        matrizCaja.totalGeneral += rec.val;
-                    }
-                });
-
-                matrizCaja.items = Object.values(itemsMap);
             }
         }
 
