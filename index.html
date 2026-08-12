@@ -6,7 +6,7 @@
     <title>Sistema de Rendición de Cuentas - Agregadurías Navales</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PDF.js para lectura de PDF en cliente -->
+    <!-- PDF.js para lectura de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <!-- SheetJS para lectura/exportación de Excel -->
@@ -16,8 +16,6 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         .navy-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; }
-        .input-dark { background-color: #0f172a; border: 1px solid #475569; color: #f8fafc; border-radius: 0.375rem; padding: 0.5rem 0.75rem; width: 100%; }
-        .input-dark:focus { border-color: #38bdf8; outline: none; }
         .tab-btn.active { border-bottom: 2px solid #38bdf8; color: #38bdf8; font-weight: 600; }
     </style>
 </head>
@@ -36,7 +34,7 @@
         </div>
         <div>
             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Orden Cronológico Ascendente · Comas Decimales
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Formato Español (1.000,50)
             </span>
         </div>
     </header>
@@ -58,7 +56,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">2. Caja Trimestral (Excel .xls / .xlsx)</label>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">2. Caja Trimestral (.xls / .xlsx)</label>
                         <input type="file" id="excelInput" accept=".xls,.xlsx" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 cursor-pointer border border-slate-700 rounded-lg bg-slate-900/50">
                     </div>
 
@@ -71,11 +69,11 @@
             <!-- Panel Informativo -->
             <div class="navy-card p-5 text-xs text-slate-400 space-y-2">
                 <h3 class="font-semibold text-slate-200 flex items-center gap-1.5 text-sm">
-                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Reglas de Formato
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Especificaciones
                 </h3>
-                <p>• <strong>Fechas:</strong> Ordenadas cronológicamente desde el primer día al último día del mes.</p>
-                <p>• <strong>Decimales:</strong> Separador con coma (ej. <code class="text-sky-300">1000,51</code>).</p>
-                <p>• <strong>Transacciones:</strong> Provenientes 100% de la cartola bancaria HSBC.</p>
+                <p>• <strong>Fechas:</strong> Ordenadas cronológicamente del 1° al último día del mes en formato <code class="text-sky-300">DD/MM/AA</code>.</p>
+                <p>• <strong>Montos:</strong> Separador de miles con punto y decimales con coma (ej. <code class="text-sky-300">3.700,00</code>).</p>
+                <p>• <strong>Caja Trimestral:</strong> Matriz por país ordenada alfabéticamente + Totales generales.</p>
             </div>
 
         </section>
@@ -86,15 +84,18 @@
             <div class="navy-card p-5 min-h-[550px] flex flex-col">
                 
                 <!-- Pestañas de Navegación -->
-                <div class="flex border-b border-slate-700 gap-6 text-sm mb-4 overflow-x-auto">
-                    <button onclick="switchTab('tabEgresos')" id="btnTabEgresos" class="tab-btn active pb-2 transition flex items-center gap-2 whitespace-nowrap">
+                <div class="flex border-b border-slate-700 gap-4 text-xs font-medium mb-4 overflow-x-auto">
+                    <button onclick="switchTab('tabEgresos')" id="btnTabEgresos" class="tab-btn active pb-2 transition flex items-center gap-1.5 whitespace-nowrap">
                         <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i> Egresos HSBC
                     </button>
-                    <button onclick="switchTab('tabIngresos')" id="btnTabIngresos" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                    <button onclick="switchTab('tabIngresos')" id="btnTabIngresos" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 whitespace-nowrap">
                         <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i> Ingresos HSBC
                     </button>
-                    <button onclick="switchTab('tabDesgloseCaja')" id="btnTabDesgloseCaja" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
-                        <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i> Desglose Caja Trimestral
+                    <button onclick="switchTab('tabDesgloseCaja')" id="btnTabDesgloseCaja" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 whitespace-nowrap">
+                        <i data-lucide="grid" class="w-4 h-4 text-amber-400"></i> Matriz Caja Trimestral (Por País)
+                    </button>
+                    <button onclick="switchTab('tabTotalesGenerales')" id="btnTabTotalesGenerales" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 whitespace-nowrap">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-sky-400"></i> Totales Generales por Ítem
                     </button>
                 </div>
 
@@ -152,19 +153,30 @@
                         </table>
                     </div>
 
-                    <!-- TAB DESGLOSE CAJA -->
+                    <!-- TAB DESGLOSE CAJA POR PAÍS -->
                     <div id="tabDesgloseCaja" class="tab-content hidden">
-                        <table id="tableDesgloseCaja" class="w-full text-left text-xs text-slate-300">
+                        <table id="tableDesgloseCaja" class="w-full text-left text-xs text-slate-300 whitespace-nowrap">
+                            <thead id="headCajaMatriz" class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
+                                <tr><th class="p-2.5">ITEM</th><th class="p-2.5">DETALLES</th></tr>
+                            </thead>
+                            <tbody id="bodyCajaMatriz" class="divide-y divide-slate-800/60">
+                                <tr><td colspan="2" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel (.xls/.xlsx) para generar la matriz.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TAB TOTALES GENERALES -->
+                    <div id="tabTotalesGenerales" class="tab-content hidden">
+                        <table id="tableTotalesGenerales" class="w-full text-left text-xs text-slate-300">
                             <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
                                 <tr>
-                                    <th class="p-2.5">Agregaduría</th>
-                                    <th class="p-2.5">Código Ítem</th>
-                                    <th class="p-2.5">Detalle Ítem</th>
-                                    <th class="p-2.5 text-right">Monto Asignado USD</th>
+                                    <th class="p-2.5">CÓDIGO ÍTEM</th>
+                                    <th class="p-2.5">DETALLE DEL ÍTEM</th>
+                                    <th class="p-2.5 text-right">TOTAL GENERAL (USD)</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-800/60">
-                                <tr><td colspan="4" class="p-6 text-center text-slate-500">Suba el archivo de Caja Trimestral para extraer el desglose por ítem.</td></tr>
+                            <tbody id="bodyTotalesGenerales" class="divide-y divide-slate-800/60">
+                                <tr><td colspan="3" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel para consolidar los totales generales.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -177,12 +189,12 @@
 
     </main>
 
-    <!-- JAVASCRIPT: ORDENAMIENTO CRONOLÓGICO Y FORMATO CON COMAS -->
+    <!-- JAVASCRIPT: ORDEN CRONOLÓGICO, COMAS DECIMALES Y MATRIZ POR PAÍS -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
         let datosHsbc = { egresos: [], ingresos: [] };
-        let desgloseCaja = [];
+        let matrizCaja = { paises: [], items: [], data: {}, totalesPais: {}, totalGeneral: 0 };
         let activeTab = 'tabEgresos';
 
         lucide.createIcons();
@@ -193,7 +205,6 @@
             'Ene': 1, 'Abr': 4, 'Ago': 8, 'Dic': 12
         };
 
-        // Convierte fecha "28 Jul 2026" a objeto Date para ordenar
         function parsearFechaHsbc(fechaRaw) {
             let partes = fechaRaw.trim().split(/\s+/);
             if (partes.length === 3) {
@@ -205,7 +216,6 @@
             return new Date(0);
         }
 
-        // Formatea fecha a string "DD/MM/AA"
         function formatearFechaDDMMAA(d) {
             let dia = String(d.getDate()).padStart(2, '0');
             let mes = String(d.getMonth() + 1).padStart(2, '0');
@@ -213,10 +223,15 @@
             return `${dia}/${mes}/${anio}`;
         }
 
-        // Formatea número reemplazando el punto por coma (ej: 1000,51)
-        function formatearMontoComa(val) {
-            if (isNaN(val) || val === null) return '0,00';
-            return val.toFixed(2).replace('.', ',');
+        // Formato con punto de miles y coma decimal (ej. 3.700,00)
+        function formatearMonedaEspanol(val) {
+            if (val === 0) return '0,00';
+            if (isNaN(val) || val === null) return '-';
+            
+            let partes = val.toFixed(2).split('.');
+            let entero = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            let decimal = partes[1];
+            return `${entero},${decimal}`;
         }
 
         function switchTab(tabId) {
@@ -229,6 +244,7 @@
             if(tabId === 'tabEgresos') document.getElementById('btnTabEgresos').classList.add('active');
             if(tabId === 'tabIngresos') document.getElementById('btnTabIngresos').classList.add('active');
             if(tabId === 'tabDesgloseCaja') document.getElementById('btnTabDesgloseCaja').classList.add('active');
+            if(tabId === 'tabTotalesGenerales') document.getElementById('btnTabTotalesGenerales').classList.add('active');
         }
 
         async function procesarArchivos() {
@@ -270,18 +286,18 @@
                 }
 
                 if (excelFile) {
-                    await procesarExcelCaja(excelFile);
+                    await procesarExcelCajaMatriz(excelFile);
                 }
 
                 renderizarTablas();
 
                 let msj = `✓ Procesado: ${datosHsbc.ingresos.length} Ingresos, ${datosHsbc.egresos.length} Egresos`;
-                if (desgloseCaja.length > 0) msj += ` y ${desgloseCaja.length} ítems de Caja Trimestral.`;
+                if (matrizCaja.paises.length > 0) msj += ` y Caja Trimestral (${matrizCaja.paises.length} Países).`;
                 statusMsg.innerHTML = `<span class="text-emerald-400 font-medium">${msj}</span>`;
 
             } catch (error) {
                 console.error("Error al procesar:", error);
-                statusMsg.innerHTML = `<span class="text-rose-400">Error al procesar los archivos. Verifique que correspondan a los formatos oficiales.</span>`;
+                statusMsg.innerHTML = `<span class="text-rose-400">Error al procesar los archivos. Verifique el formato.</span>`;
             }
         }
 
@@ -315,48 +331,118 @@
                 }
             });
 
-            // Ordenar de forma ascendente por fecha (del 1er día del mes al último)
+            // Ordenar de forma ascendente por fecha (1° al último día del mes)
             datosHsbc.egresos.sort((a, b) => a.fechaObj - b.fechaObj);
             datosHsbc.ingresos.sort((a, b) => a.fechaObj - b.fechaObj);
         }
 
-        async function procesarExcelCaja(file) {
-            desgloseCaja = [];
+        async function procesarExcelCajaMatriz(file) {
+            matrizCaja = { paises: [], items: [], data: {}, totalesPais: {}, totalGeneral: 0 };
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            
+            // Preferir 'Hoja3' si existe (es la matriz vertical oficial), si no la primera hoja
+            let sheetName = workbook.SheetNames.includes('Hoja3') ? 'Hoja3' : workbook.SheetNames[0];
+            let sheet = workbook.Sheets[sheetName];
+            let rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            let itemCodes = rows[1] || [];
-            let itemNames = rows[2] || [];
+            if (sheetName === 'Hoja3') {
+                // Parsear Hoja3 directa
+                let headerRow = rows[1] || [];
+                let paisesTemp = [];
+                let colToPais = {};
 
-            for (let r = 3; r < rows.length; r++) {
-                let row = rows[r];
-                if (!row || !row[0]) continue;
-                let agregad = String(row[0]).trim();
-                
-                if (agregad.startsWith('- TOTALES') || agregad.startsWith('RESUMEN')) break;
-                if (agregad.startsWith('UU.EE.')) continue;
+                for (let c = 2; c < headerRow.length; c++) {
+                    let cellVal = String(headerRow[c] || '').trim();
+                    if (!cellVal || cellVal.startsWith('TOTALES')) continue;
+                    let nombrePais = cellVal.split('\n')[0].split('
+')[0].trim();
+                    paisesTemp.push({ colIdx: c, nombre: nombrePais });
+                }
 
-                for (let c = 1; c < row.length; c++) {
-                    let val = parseFloat(row[c]);
-                    if (!isNaN(val) && val > 0) {
-                        let code = itemCodes[c] || 'S/I';
-                        let name = itemNames[c] || 'VARIOS';
-                        desgloseCaja.push({
-                            agregad: agregad,
-                            itemCode: code,
-                            itemName: name,
-                            monto: val
-                        });
+                // Ordenar países alfabéticamente
+                paisesTemp.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+                matrizCaja.paises = paisesTemp.map(p => p.nombre);
+
+                // Inicializar acumuladores
+                matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
+
+                for (let r = 2; r < rows.length; r++) {
+                    let row = rows[r];
+                    if (!row || !row[0]) continue;
+                    let code = String(row[0]).trim();
+                    let name = String(row[1] || '').trim();
+
+                    if (code === 'NaN' || name === 'TOTALES') continue;
+
+                    let itemObj = { code, name, totalItem: 0 };
+                    matrizCaja.data[code] = {};
+
+                    paisesTemp.forEach(p => {
+                        let val = parseFloat(row[p.colIdx]);
+                        val = isNaN(val) ? 0 : val;
+                        matrizCaja.data[code][p.nombre] = val;
+                        matrizCaja.totalesPais[p.nombre] += val;
+                        itemObj.totalItem += val;
+                    });
+
+                    matrizCaja.items.push(itemObj);
+                    matrizCaja.totalGeneral += itemObj.totalItem;
+                }
+            } else {
+                // Parsear Hoja1 transpuesta
+                let itemCodes = rows[1] || [];
+                let itemNames = rows[2] || [];
+                let paisesSet = new Set();
+                let rawRecords = [];
+
+                for (let r = 3; r < rows.length; r++) {
+                    let row = rows[r];
+                    if (!row || !row[0]) continue;
+                    let agregad = String(row[0]).trim();
+                    if (agregad.startsWith('- TOTALES') || agregad.startsWith('RESUMEN')) break;
+                    if (agregad.startsWith('UU.EE.')) continue;
+
+                    paisesSet.add(agregad);
+
+                    for (let c = 1; c < row.length; c++) {
+                        let val = parseFloat(row[c]);
+                        if (!isNaN(val) && val > 0) {
+                            rawRecords.push({ agregad, code: itemCodes[c], name: itemNames[c], val });
+                        }
                     }
                 }
+
+                matrizCaja.paises = Array.from(paisesSet).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+                matrizCaja.paises.forEach(p => matrizCaja.totalesPais[p] = 0);
+
+                // Recopilar ítems únicos
+                let itemsMap = {};
+                for (let c = 1; c < itemCodes.length; c++) {
+                    let code = itemCodes[c];
+                    let name = itemNames[c];
+                    if (code && !itemsMap[code]) {
+                        itemsMap[code] = { code, name, totalItem: 0 };
+                        matrizCaja.data[code] = {};
+                        matrizCaja.paises.forEach(p => matrizCaja.data[code][p] = 0);
+                    }
+                }
+
+                rawRecords.forEach(rec => {
+                    if (matrizCaja.data[rec.code]) {
+                        matrizCaja.data[rec.code][rec.agregad] = rec.val;
+                        matrizCaja.totalesPais[rec.agregad] += rec.val;
+                        itemsMap[rec.code].totalItem += rec.val;
+                        matrizCaja.totalGeneral += rec.val;
+                    }
+                });
+
+                matrizCaja.items = Object.values(itemsMap);
             }
         }
 
         function renderizarTablas() {
-            // TAB EGRESOS
+            // TAB 1: EGRESOS
             const tbodyEgr = document.querySelector('#tableEgresos tbody');
             tbodyEgr.innerHTML = '';
             let corrEgr = 1;
@@ -368,7 +454,7 @@
                         <td class="p-2.5 font-mono">${item.fecha}</td>
                         <td class="p-2.5 font-mono text-sky-400">${item.ref}</td>
                         <td class="p-2.5">${item.detalle}</td>
-                        <td class="p-2.5 text-right font-medium text-rose-400">${formatearMontoComa(item.monto)}</td>
+                        <td class="p-2.5 text-right font-medium text-rose-400">${formatearMonedaEspanol(item.monto)}</td>
                     </tr>`;
             });
 
@@ -376,7 +462,7 @@
                 tbodyEgr.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>`;
             }
 
-            // TAB INGRESOS
+            // TAB 2: INGRESOS
             const tbodyIng = document.querySelector('#tableIngresos tbody');
             tbodyIng.innerHTML = '';
             let corrIng = 1;
@@ -388,7 +474,7 @@
                         <td class="p-2.5 font-mono">${item.fecha}</td>
                         <td class="p-2.5 font-mono text-sky-400">${item.ref}</td>
                         <td class="p-2.5">${item.detalle}</td>
-                        <td class="p-2.5 text-right font-medium text-emerald-400">${formatearMontoComa(item.monto)}</td>
+                        <td class="p-2.5 text-right font-medium text-emerald-400">${formatearMonedaEspanol(item.monto)}</td>
                     </tr>`;
             });
 
@@ -396,26 +482,70 @@
                 tbodyIng.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>`;
             }
 
-            // TAB DESGLOSE CAJA
-            const tbodyCaja = document.querySelector('#tableDesgloseCaja tbody');
-            tbodyCaja.innerHTML = '';
-            desgloseCaja.forEach(item => {
-                tbodyCaja.innerHTML += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="p-2.5 font-medium text-slate-200">${item.agregad}</td>
-                        <td class="p-2.5 font-mono text-sky-300">${item.itemCode}</td>
-                        <td class="p-2.5">${item.itemName}</td>
-                        <td class="p-2.5 text-right font-medium text-emerald-400">${formatearMontoComa(item.monto)}</td>
-                    </tr>`;
-            });
+            // TAB 3: MATRIZ CAJA
+            const headCaja = document.getElementById('headCajaMatriz');
+            const bodyCaja = document.getElementById('bodyCajaMatriz');
 
-            if (desgloseCaja.length === 0) {
-                tbodyCaja.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Suba el archivo de Caja Trimestral en Excel (.xls/.xlsx) para extraer el desglose.</td></tr>`;
+            if (matrizCaja.paises.length > 0) {
+                let headHTML = `<tr><th class="p-2.5">ITEM</th><th class="p-2.5">DETALLES</th>`;
+                matrizCaja.paises.forEach(p => {
+                    headHTML += `<th class="p-2.5 text-right text-sky-300">${p}</th>`;
+                });
+                headHTML += `<th class="p-2.5 text-right text-emerald-400 font-bold">TOTAL ÍTEM</th></tr>`;
+                headCaja.innerHTML = headHTML;
+
+                let bodyHTML = '';
+                matrizCaja.items.forEach(it => {
+                    bodyHTML += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-2.5 font-mono text-sky-400">${it.code}</td>
+                        <td class="p-2.5">${it.name}</td>`;
+                    matrizCaja.paises.forEach(p => {
+                        let val = matrizCaja.data[it.code] ? matrizCaja.data[it.code][p] : 0;
+                        bodyHTML += `<td class="p-2.5 text-right font-mono">${val > 0 ? formatearMonedaEspanol(val) : '-'}</td>`;
+                    });
+                    bodyHTML += `<td class="p-2.5 text-right font-mono font-semibold text-emerald-400">${formatearMonedaEspanol(it.totalItem)}</td></tr>`;
+                });
+
+                // Fila de Totales por País
+                bodyHTML += `<tr class="bg-slate-900 font-bold border-t-2 border-slate-700">
+                    <td colspan="2" class="p-2.5 text-slate-200">TOTALES</td>`;
+                matrizCaja.paises.forEach(p => {
+                    bodyHTML += `<td class="p-2.5 text-right font-mono text-emerald-400">${formatearMonedaEspanol(matrizCaja.totalesPais[p])}</td>`;
+                });
+                bodyHTML += `<td class="p-2.5 text-right font-mono text-emerald-300 text-sm">${formatearMonedaEspanol(matrizCaja.totalGeneral)}</td></tr>`;
+
+                bodyCaja.innerHTML = bodyHTML;
+            } else {
+                bodyCaja.innerHTML = `<tr><td colspan="2" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel (.xls/.xlsx) para generar la matriz.</td></tr>`;
+            }
+
+            // TAB 4: TOTALES GENERALES
+            const bodyTotales = document.getElementById('bodyTotalesGenerales');
+            if (matrizCaja.items.length > 0) {
+                let totalesHTML = '';
+                matrizCaja.items.forEach(it => {
+                    totalesHTML += `<tr class="hover:bg-slate-800/40">
+                        <td class="p-2.5 font-mono text-sky-400">${it.code}</td>
+                        <td class="p-2.5">${it.name}</td>
+                        <td class="p-2.5 text-right font-mono font-semibold text-emerald-400">${formatearMonedaEspanol(it.totalItem)}</td>
+                    </tr>`;
+                });
+                totalesHTML += `<tr class="bg-slate-900 font-bold border-t-2 border-slate-700 text-sm">
+                    <td colspan="2" class="p-2.5 text-slate-200">TOTAL GENERAL CAJA TRIMESTRAL</td>
+                    <td class="p-2.5 text-right font-mono text-emerald-300">${formatearMonedaEspanol(matrizCaja.totalGeneral)}</td>
+                </tr>`;
+                bodyTotales.innerHTML = totalesHTML;
+            } else {
+                bodyTotales.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-500">Suba la Caja Trimestral en Excel para consolidar los totales generales.</td></tr>`;
             }
         }
 
         function copiarTablaActual() {
-            let tableId = activeTab === 'tabEgresos' ? 'tableEgresos' : (activeTab === 'tabIngresos' ? 'tableIngresos' : 'tableDesgloseCaja');
+            let tableId = 'tableEgresos';
+            if (activeTab === 'tabIngresos') tableId = 'tableIngresos';
+            if (activeTab === 'tabDesgloseCaja') tableId = 'tableDesgloseCaja';
+            if (activeTab === 'tabTotalesGenerales') tableId = 'tableTotalesGenerales';
+
             let table = document.getElementById(tableId);
 
             if (!table || table.rows.length <= 1) {
@@ -442,10 +572,12 @@
             let tableEgr = document.getElementById('tableEgresos');
             let tableIng = document.getElementById('tableIngresos');
             let tableCaja = document.getElementById('tableDesgloseCaja');
+            let tableTotales = document.getElementById('tableTotalesGenerales');
 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableEgr), "Egresos");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableIng), "Ingresos");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableCaja), "Desglose Caja");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableCaja), "Matriz Caja");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableTotales), "Totales por Ítem");
 
             XLSX.writeFile(wb, "Rendicion_Completa_AANN.xlsx");
         }
