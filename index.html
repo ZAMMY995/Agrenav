@@ -7,8 +7,9 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PDF.js para lectura de PDF en cliente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <!-- SheetJS para exportación Excel -->
+    <!-- SheetJS para lectura/exportación de Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -35,73 +36,46 @@
         </div>
         <div>
             <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Listo
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Orden Cronológico Ascendente · Comas Decimales
             </span>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- Panel Izquierdo: Carga y Entradas -->
+        <!-- Panel Izquierdo: Carga de Archivos -->
         <section class="lg:col-span-4 space-y-6">
             
-            <!-- Carga de PDF -->
             <div class="navy-card p-5">
                 <h2 class="text-base font-semibold text-slate-200 mb-4 flex items-center gap-2">
-                    <i data-lucide="file-text" class="w-5 h-5 text-sky-400"></i> Cartola Bancaria HSBC
+                    <i data-lucide="file-up" class="w-5 h-5 text-sky-400"></i> Carga de Archivos
                 </h2>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-300 mb-1">Cargar Cartola PDF</label>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">1. Cartola HSBC (PDF)</label>
                         <input type="file" id="pdfInput" accept=".pdf" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer border border-slate-700 rounded-lg bg-slate-900/50">
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">2. Caja Trimestral (Excel .xls / .xlsx)</label>
+                        <input type="file" id="excelInput" accept=".xls,.xlsx" class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 cursor-pointer border border-slate-700 rounded-lg bg-slate-900/50">
+                    </div>
+
                     <button id="btnProcesar" onclick="procesarArchivos()" class="w-full mt-2 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-md shadow-sky-900/20">
-                        <i data-lucide="cpu" class="w-4 h-4"></i> Procesar Cartola
+                        <i data-lucide="cpu" class="w-4 h-4"></i> Procesar Documentos
                     </button>
                 </div>
             </div>
 
-            <!-- Egresos por Resoluciones / Adicionales -->
-            <div class="navy-card p-5">
-                <h2 class="text-base font-semibold text-slate-200 mb-1 flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-400"></i> Egresos Extra / Resoluciones
-                </h2>
-                <p class="text-xs text-slate-400 mb-4">Ingresa egresos adicionales por resoluciones u otros ítems.</p>
-
-                <form id="formManual" onsubmit="agregarEgresoExtra(event)" class="space-y-3">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Fecha</label>
-                            <input type="date" id="mFecha" required class="input-dark text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">N° Comprobante / Res.</label>
-                            <input type="text" id="mCompte" placeholder="Ej: 5000012" required class="input-dark text-xs">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Detalle</label>
-                        <input type="text" id="mDetalle" placeholder="Ej: Res. DGTM Nº 142/2026" required class="input-dark text-xs">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Código Ítem</label>
-                            <input type="text" id="mItem" placeholder="Ej: 22.08.999.002" required class="input-dark text-xs">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Monto USD</label>
-                            <input type="number" step="0.01" id="mMonto" placeholder="0.00" required class="input-dark text-xs">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg text-xs transition flex items-center justify-center gap-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Añadir Egreso
-                    </button>
-                </form>
+            <!-- Panel Informativo -->
+            <div class="navy-card p-5 text-xs text-slate-400 space-y-2">
+                <h3 class="font-semibold text-slate-200 flex items-center gap-1.5 text-sm">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> Reglas de Formato
+                </h3>
+                <p>• <strong>Fechas:</strong> Ordenadas cronológicamente desde el primer día al último día del mes.</p>
+                <p>• <strong>Decimales:</strong> Separador con coma (ej. <code class="text-sky-300">1000,51</code>).</p>
+                <p>• <strong>Transacciones:</strong> Provenientes 100% de la cartola bancaria HSBC.</p>
             </div>
 
         </section>
@@ -112,19 +86,22 @@
             <div class="navy-card p-5 min-h-[550px] flex flex-col">
                 
                 <!-- Pestañas de Navegación -->
-                <div class="flex border-b border-slate-700 gap-6 text-sm mb-4">
-                    <button onclick="switchTab('tabEgresos')" id="btnTabEgresos" class="tab-btn active pb-2 transition flex items-center gap-2">
-                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i> Egresos HSBC (N° Compte / Fecha / Detalle / Monto)
+                <div class="flex border-b border-slate-700 gap-6 text-sm mb-4 overflow-x-auto">
+                    <button onclick="switchTab('tabEgresos')" id="btnTabEgresos" class="tab-btn active pb-2 transition flex items-center gap-2 whitespace-nowrap">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i> Egresos HSBC
                     </button>
-                    <button onclick="switchTab('tabIngresos')" id="btnTabIngresos" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-2">
-                        <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i> Ingresos HSBC (N° Compte / Fecha / Detalle / Monto)
+                    <button onclick="switchTab('tabIngresos')" id="btnTabIngresos" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                        <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i> Ingresos HSBC
+                    </button>
+                    <button onclick="switchTab('tabDesgloseCaja')" id="btnTabDesgloseCaja" class="tab-btn pb-2 text-slate-400 hover:text-slate-200 transition flex items-center gap-2 whitespace-nowrap">
+                        <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i> Desglose Caja Trimestral
                     </button>
                 </div>
 
-                <!-- Barra de Estado y Botones de Copiado -->
+                <!-- Barra de Estado y Botones -->
                 <div class="flex justify-between items-center mb-4 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
                     <div id="statusMsg" class="text-xs text-slate-400 flex items-center gap-2">
-                        <i data-lucide="info" class="w-4 h-4 text-sky-400"></i> Suba la cartola en PDF y presione "Procesar Cartola".
+                        <i data-lucide="info" class="w-4 h-4 text-sky-400"></i> Suba los archivos y presione "Procesar Documentos".
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copiarTablaActual()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs rounded font-medium flex items-center gap-1.5 transition">
@@ -145,10 +122,10 @@
                             <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
                                 <tr>
                                     <th class="p-2.5">N° Corr</th>
-                                    <th class="p-2.5">Fecha</th>
-                                    <th class="p-2.5">N° Comprobante (Ref. HSBC)</th>
+                                    <th class="p-2.5">Fecha (DD/MM/AA)</th>
+                                    <th class="p-2.5">N° Comprobante</th>
                                     <th class="p-2.5">Detalle</th>
-                                    <th class="p-2.5 text-right">Monto (USD)</th>
+                                    <th class="p-2.5 text-right">Monto USD</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800/60">
@@ -163,14 +140,31 @@
                             <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
                                 <tr>
                                     <th class="p-2.5">N° Corr</th>
-                                    <th class="p-2.5">Fecha</th>
-                                    <th class="p-2.5">N° Comprobante (Ref. HSBC)</th>
+                                    <th class="p-2.5">Fecha (DD/MM/AA)</th>
+                                    <th class="p-2.5">N° Comprobante</th>
                                     <th class="p-2.5">Detalle</th>
-                                    <th class="p-2.5 text-right">Monto (USD)</th>
+                                    <th class="p-2.5 text-right">Monto USD</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800/60">
                                 <tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TAB DESGLOSE CAJA -->
+                    <div id="tabDesgloseCaja" class="tab-content hidden">
+                        <table id="tableDesgloseCaja" class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
+                                <tr>
+                                    <th class="p-2.5">Agregaduría</th>
+                                    <th class="p-2.5">Código Ítem</th>
+                                    <th class="p-2.5">Detalle Ítem</th>
+                                    <th class="p-2.5 text-right">Monto Asignado USD</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60">
+                                <tr><td colspan="4" class="p-6 text-center text-slate-500">Suba el archivo de Caja Trimestral para extraer el desglose por ítem.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -183,15 +177,47 @@
 
     </main>
 
-    <!-- JAVASCRIPT CON PARSER DE TEXTO ROBUSTO -->
+    <!-- JAVASCRIPT: ORDENAMIENTO CRONOLÓGICO Y FORMATO CON COMAS -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
         let datosHsbc = { egresos: [], ingresos: [] };
-        let egresosExtra = [];
+        let desgloseCaja = [];
         let activeTab = 'tabEgresos';
 
         lucide.createIcons();
+
+        const mesesMap = {
+            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+            'Ene': 1, 'Abr': 4, 'Ago': 8, 'Dic': 12
+        };
+
+        // Convierte fecha "28 Jul 2026" a objeto Date para ordenar
+        function parsearFechaHsbc(fechaRaw) {
+            let partes = fechaRaw.trim().split(/\s+/);
+            if (partes.length === 3) {
+                let dia = parseInt(partes[0], 10);
+                let mes = mesesMap[partes[1]] || 1;
+                let anio = parseInt(partes[2], 10);
+                return new Date(anio, mes - 1, dia);
+            }
+            return new Date(0);
+        }
+
+        // Formatea fecha a string "DD/MM/AA"
+        function formatearFechaDDMMAA(d) {
+            let dia = String(d.getDate()).padStart(2, '0');
+            let mes = String(d.getMonth() + 1).padStart(2, '0');
+            let anio = String(d.getFullYear()).slice(-2);
+            return `${dia}/${mes}/${anio}`;
+        }
+
+        // Formatea número reemplazando el punto por coma (ej: 1000,51)
+        function formatearMontoComa(val) {
+            if (isNaN(val) || val === null) return '0,00';
+            return val.toFixed(2).replace('.', ',');
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -202,54 +228,60 @@
 
             if(tabId === 'tabEgresos') document.getElementById('btnTabEgresos').classList.add('active');
             if(tabId === 'tabIngresos') document.getElementById('btnTabIngresos').classList.add('active');
+            if(tabId === 'tabDesgloseCaja') document.getElementById('btnTabDesgloseCaja').classList.add('active');
         }
 
         async function procesarArchivos() {
             const pdfFile = document.getElementById('pdfInput').files[0];
+            const excelFile = document.getElementById('excelInput').files[0];
             const statusMsg = document.getElementById('statusMsg');
 
-            if (!pdfFile) {
-                alert('Por favor seleccione la Cartola Bancaria HSBC en formato PDF.');
+            if (!pdfFile && !excelFile) {
+                alert('Por favor seleccione al menos un archivo (Cartola PDF o Caja Excel).');
                 return;
             }
 
-            statusMsg.innerHTML = `<span class="text-sky-400 animate-pulse">Procesando Cartola HSBC...</span>`;
+            statusMsg.innerHTML = `<span class="text-sky-400 animate-pulse">Procesando archivos...</span>`;
 
             try {
-                const arrayBuffer = await pdfFile.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                let textLines = [];
+                if (pdfFile) {
+                    const arrayBuffer = await pdfFile.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let textLines = [];
 
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const tokenProps = await page.getTextContent();
-                    
-                    // Agrupar items por línea de coordenadas Y para extraer texto exacto
-                    let linesMap = {};
-                    tokenProps.items.forEach(item => {
-                        let y = Math.round(item.transform[5]);
-                        if (!linesMap[y]) linesMap[y] = [];
-                        linesMap[y].push(item.str);
-                    });
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const tokenProps = await page.getTextContent();
+                        
+                        let linesMap = {};
+                        tokenProps.items.forEach(item => {
+                            let y = Math.round(item.transform[5]);
+                            if (!linesMap[y]) linesMap[y] = [];
+                            linesMap[y].push(item.str);
+                        });
 
-                    // Ordenar de arriba a abajo en la página
-                    let sortedY = Object.keys(linesMap).sort((a, b) => b - a);
-                    sortedY.forEach(y => {
-                        let lineStr = linesMap[y].join(" ").trim();
-                        if (lineStr) textLines.push(lineStr);
-                    });
+                        let sortedY = Object.keys(linesMap).sort((a, b) => b - a);
+                        sortedY.forEach(y => {
+                            let lineStr = linesMap[y].join(" ").trim();
+                            if (lineStr) textLines.push(lineStr);
+                        });
+                    }
+                    extraerTransaccionesHSBC(textLines);
                 }
 
-                extraerTransaccionesHSBC(textLines);
+                if (excelFile) {
+                    await procesarExcelCaja(excelFile);
+                }
+
                 renderizarTablas();
 
-                let totalEgresos = datosHsbc.egresos.length + egresosExtra.length;
-                let totalIngresos = datosHsbc.ingresos.length;
+                let msj = `✓ Procesado: ${datosHsbc.ingresos.length} Ingresos, ${datosHsbc.egresos.length} Egresos`;
+                if (desgloseCaja.length > 0) msj += ` y ${desgloseCaja.length} ítems de Caja Trimestral.`;
+                statusMsg.innerHTML = `<span class="text-emerald-400 font-medium">${msj}</span>`;
 
-                statusMsg.innerHTML = `<span class="text-emerald-400 font-medium">✓ Procesado: ${totalIngresos} Ingresos y ${totalEgresos} Egresos detectados.</span>`;
             } catch (error) {
-                console.error("Error al procesar PDF:", error);
-                statusMsg.innerHTML = `<span class="text-rose-400">Error al procesar el archivo PDF. Asegúrese de cargar la cartola oficial.</span>`;
+                console.error("Error al procesar:", error);
+                statusMsg.innerHTML = `<span class="text-rose-400">Error al procesar los archivos. Verifique que correspondan a los formatos oficiales.</span>`;
             }
         }
 
@@ -258,46 +290,69 @@
             datosHsbc.ingresos = [];
 
             lines.forEach(line => {
-                // Captura patrones como: 209380734 28 Jul 2026 AGRENAVPERU12,003.20-3,165.00
-                // O: 190469300 09 Jul 2026 B43645400197,858.20 82,608.00
                 let match = line.match(/^(\d{8,10})\s+(\d{2}\s+[A-Za-z]{3}\s+\d{4})\s+(.+)$/);
                 if (match) {
                     let ref = match[1];
-                    let fecha = match[2];
+                    let fechaOriginal = match[2];
+                    let fechaObj = parsearFechaHsbc(fechaOriginal);
+                    let fechaFormateada = formatearFechaDDMMAA(fechaObj);
                     let resto = match[3];
 
-                    // Buscar el monto al final de la línea
                     let montoMatch = resto.match(/(-?[\d,]+\.\d{2})\s*$/);
                     if (montoMatch) {
                         let montoStr = montoMatch[1];
                         let detalleRaw = resto.substring(0, resto.lastIndexOf(montoStr)).trim();
-                        
-                        // Limpiar saldo sobrante adjunto al detalle si existe
                         let detalleLimpio = detalleRaw.replace(/[\d,]+\.\d{2}$/, '').trim();
 
                         if (montoStr.includes('-')) {
                             let monto = Math.abs(parseFloat(montoStr.replace('-', '').replace(/,/g, '')));
-                            datosHsbc.egresos.push({ ref, fecha, detalle: detalleLimpio, monto });
+                            datosHsbc.egresos.push({ ref, fechaObj, fecha: fechaFormateada, detalle: detalleLimpio, monto });
                         } else {
                             let monto = parseFloat(montoStr.replace(/,/g, ''));
-                            datosHsbc.ingresos.push({ ref, fecha, detalle: detalleLimpio, monto });
+                            datosHsbc.ingresos.push({ ref, fechaObj, fecha: fechaFormateada, detalle: detalleLimpio, monto });
                         }
                     }
                 }
             });
+
+            // Ordenar de forma ascendente por fecha (del 1er día del mes al último)
+            datosHsbc.egresos.sort((a, b) => a.fechaObj - b.fechaObj);
+            datosHsbc.ingresos.sort((a, b) => a.fechaObj - b.fechaObj);
         }
 
-        function agregarEgresoExtra(event) {
-            event.preventDefault();
-            const fecha = document.getElementById('mFecha').value;
-            const compte = document.getElementById('mCompte').value;
-            const detalle = document.getElementById('mDetalle').value;
-            const item = document.getElementById('mItem').value;
-            const monto = parseFloat(document.getElementById('mMonto').value);
+        async function procesarExcelCaja(file) {
+            desgloseCaja = [];
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-            egresosExtra.push({ fecha, compte, detalle, item, monto });
-            document.getElementById('formManual').reset();
-            renderizarTablas();
+            let itemCodes = rows[1] || [];
+            let itemNames = rows[2] || [];
+
+            for (let r = 3; r < rows.length; r++) {
+                let row = rows[r];
+                if (!row || !row[0]) continue;
+                let agregad = String(row[0]).trim();
+                
+                if (agregad.startsWith('- TOTALES') || agregad.startsWith('RESUMEN')) break;
+                if (agregad.startsWith('UU.EE.')) continue;
+
+                for (let c = 1; c < row.length; c++) {
+                    let val = parseFloat(row[c]);
+                    if (!isNaN(val) && val > 0) {
+                        let code = itemCodes[c] || 'S/I';
+                        let name = itemNames[c] || 'VARIOS';
+                        desgloseCaja.push({
+                            agregad: agregad,
+                            itemCode: code,
+                            itemName: name,
+                            monto: val
+                        });
+                    }
+                }
+            }
         }
 
         function renderizarTablas() {
@@ -310,25 +365,14 @@
                 tbodyEgr.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
                         <td class="p-2.5 font-mono text-slate-400">${corrEgr++}</td>
-                        <td class="p-2.5">${item.fecha}</td>
+                        <td class="p-2.5 font-mono">${item.fecha}</td>
                         <td class="p-2.5 font-mono text-sky-400">${item.ref}</td>
                         <td class="p-2.5">${item.detalle}</td>
-                        <td class="p-2.5 text-right font-medium text-rose-400">${item.monto.toFixed(2)}</td>
+                        <td class="p-2.5 text-right font-medium text-rose-400">${formatearMontoComa(item.monto)}</td>
                     </tr>`;
             });
 
-            egresosExtra.forEach(item => {
-                tbodyEgr.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 bg-emerald-950/20">
-                        <td class="p-2.5 font-mono text-slate-400">${corrEgr++}</td>
-                        <td class="p-2.5">${item.fecha}</td>
-                        <td class="p-2.5 font-mono text-amber-400">${item.compte}</td>
-                        <td class="p-2.5">${item.detalle} <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">Res. Extra [${item.item}]</span></td>
-                        <td class="p-2.5 text-right font-medium text-rose-400">${item.monto.toFixed(2)}</td>
-                    </tr>`;
-            });
-
-            if (datosHsbc.egresos.length === 0 && egresosExtra.length === 0) {
+            if (datosHsbc.egresos.length === 0) {
                 tbodyEgr.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>`;
             }
 
@@ -341,20 +385,37 @@
                 tbodyIng.innerHTML += `
                     <tr class="hover:bg-slate-800/40">
                         <td class="p-2.5 font-mono text-slate-400">${corrIng++}</td>
-                        <td class="p-2.5">${item.fecha}</td>
+                        <td class="p-2.5 font-mono">${item.fecha}</td>
                         <td class="p-2.5 font-mono text-sky-400">${item.ref}</td>
                         <td class="p-2.5">${item.detalle}</td>
-                        <td class="p-2.5 text-right font-medium text-emerald-400">${item.monto.toFixed(2)}</td>
+                        <td class="p-2.5 text-right font-medium text-emerald-400">${formatearMontoComa(item.monto)}</td>
                     </tr>`;
             });
 
             if (datosHsbc.ingresos.length === 0) {
                 tbodyIng.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Esperando procesamiento de la cartola...</td></tr>`;
             }
+
+            // TAB DESGLOSE CAJA
+            const tbodyCaja = document.querySelector('#tableDesgloseCaja tbody');
+            tbodyCaja.innerHTML = '';
+            desgloseCaja.forEach(item => {
+                tbodyCaja.innerHTML += `
+                    <tr class="hover:bg-slate-800/40">
+                        <td class="p-2.5 font-medium text-slate-200">${item.agregad}</td>
+                        <td class="p-2.5 font-mono text-sky-300">${item.itemCode}</td>
+                        <td class="p-2.5">${item.itemName}</td>
+                        <td class="p-2.5 text-right font-medium text-emerald-400">${formatearMontoComa(item.monto)}</td>
+                    </tr>`;
+            });
+
+            if (desgloseCaja.length === 0) {
+                tbodyCaja.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-500">Suba el archivo de Caja Trimestral en Excel (.xls/.xlsx) para extraer el desglose.</td></tr>`;
+            }
         }
 
         function copiarTablaActual() {
-            let tableId = activeTab === 'tabEgresos' ? 'tableEgresos' : 'tableIngresos';
+            let tableId = activeTab === 'tabEgresos' ? 'tableEgresos' : (activeTab === 'tabIngresos' ? 'tableIngresos' : 'tableDesgloseCaja');
             let table = document.getElementById(tableId);
 
             if (!table || table.rows.length <= 1) {
@@ -370,9 +431,9 @@
             try {
                 document.execCommand('copy');
                 window.getSelection().removeAllRanges();
-                alert('¡Tabla copiada exitosamente! Ahora ve a Excel y presiona Ctrl + V.');
+                alert('¡Tabla copiada exitosamente! Ve a Excel y presiona Ctrl + V.');
             } catch (err) {
-                alert('No se pudo copiar automáticamente. Por favor seleccione la tabla manualmente.');
+                alert('No se pudo copiar automáticamente. Seleccione la tabla manualmente.');
             }
         }
 
@@ -380,12 +441,15 @@
             let wb = XLSX.utils.book_new();
             let tableEgr = document.getElementById('tableEgresos');
             let tableIng = document.getElementById('tableIngresos');
+            let tableCaja = document.getElementById('tableDesgloseCaja');
 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableEgr), "Egresos");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableIng), "Ingresos");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(tableCaja), "Desglose Caja");
 
-            XLSX.writeFile(wb, "Rendicion_Cartola_HSBC.xlsx");
+            XLSX.writeFile(wb, "Rendicion_Completa_AANN.xlsx");
         }
     </script>
 </body>
 </html>
+
